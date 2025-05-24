@@ -1,0 +1,29 @@
+drop table if exists comment;
+drop table if exists t_post_tag;
+drop table if exists t_post;
+drop table if exists t_tag;
+
+CREATE TABLE t_post (
+                        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                        title VARCHAR(255) NOT NULL,
+                        image BYTEA,
+                        content TEXT NOT NULL,
+                        likes_count INTEGER DEFAULT 0
+);
+
+CREATE TABLE t_tag (
+                       id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                       name VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE t_post_tag (
+                            post_id BIGINT REFERENCES t_post(id),
+                            tag_id BIGINT REFERENCES t_tag(id),
+                            PRIMARY KEY (post_id, tag_id)
+);
+
+CREATE TABLE t_comment (
+                           id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                           post_id BIGINT REFERENCES t_post(id),
+                           content TEXT NOT NULL
+);

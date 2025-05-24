@@ -1,11 +1,13 @@
 package ru.yandex.practicum.blog_app.repository;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.practicum.blog_app.config.DataSourceConfig;
 import ru.yandex.practicum.blog_app.model.Post;
 
@@ -13,8 +15,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringJUnitConfig(classes = {DataSourceConfig.class, PostRepository.class})
-@TestPropertySource(locations = "classpath:application-test.properties")
+@SpringBootTest
+@ActiveProfiles("test")
+@Import(DataSourceConfig.class)
 class PostRepositoryTest {
 
     @Autowired
@@ -25,6 +28,8 @@ class PostRepositoryTest {
 
     @BeforeEach
     void setUp() {
+        jdbcTemplate.execute("DELETE FROM t_comment");
+        jdbcTemplate.execute("ALTER TABLE t_comment ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("DELETE FROM t_post_tag");
         jdbcTemplate.execute("DELETE FROM t_post");
         jdbcTemplate.execute("DELETE FROM t_tag");
@@ -73,7 +78,8 @@ class PostRepositoryTest {
     void savePost_shouldAddPostToDb() {
         var title = "Added Post Title";
         var image = "Added Post Image".getBytes();
-        var tags = List.of("added_post");
+        var tags = List.of("added post");
+        var tagsAsText = "added post";
         var content = "Added Post Text";
 
         var postId = postRepository.savePost(title, image, tags, content);
@@ -83,7 +89,7 @@ class PostRepositoryTest {
         assertNotNull(founded);
         assertEquals(title, founded.getTitle());
         assertArrayEquals(image, founded.getImage());
-        assertEquals(tags, founded.getTagsAsText());
+        assertEquals(tagsAsText, founded.getTagsAsText());
         assertEquals(content, founded.getContent());
         assertEquals(0, founded.getLikesCount());
     }
@@ -101,6 +107,8 @@ class PostRepositoryTest {
         post.setImage(image);
         post.setContent(content);
         post.setLikesCount(likesCount);
+        post.setContentPreview(content);
+        post.setContentParts(List.of(content));
 
         postRepository.updatePost(post);
 
@@ -116,15 +124,13 @@ class PostRepositoryTest {
 
         postRepository.delete(postId);
 
-        var founded = postRepository.findPostById(postId);
-
-        assertNull(founded);
+        Assertions.assertThrows(Exception.class, () -> postRepository.findPostById(postId));
     }
 
     private List<Post> getExpectedPosts(){
         Post post1 = new Post();
         post1.setId(1L);
-        post1.setTitle("Post1");
+        post1.setTitle("Post 1");
         post1.setImage("Post Image Content One".getBytes());
         post1.setContent("Post Text1");
         post1.setLikesCount(10);
@@ -134,7 +140,7 @@ class PostRepositoryTest {
         post1.setTagsAsText("Tag1 Tag2");
         Post post2 = new Post();
         post2.setId(2L);
-        post2.setTitle("Post2");
+        post2.setTitle("Post 2");
         post2.setImage("Post Image Content Two".getBytes());
         post2.setContent("Post Text2");
         post2.setLikesCount(5);

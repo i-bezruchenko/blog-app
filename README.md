@@ -6,8 +6,7 @@
 
 ▎Описание проекта
 
->Это веб-приложение, реализованное с использованием Spring Framework (версия 6+), предназначено для ведения блога.
->Поддерживает выполнение в любом современном сервлет-контейнере, таком как Tomcat или Jetty.
+>Это веб-приложение, реализованное с использованием Spring Boot v3.4.3, предназначено для ведения блога.  
 >Приложение написано на Java 21 и предоставляет пользователям **следующие возможности**:
 
 ▎Основной функционал:
@@ -58,34 +57,27 @@
 
 >• Java 21
 >
->• Spring Framework 6.2.1
+>• Spring Boot 3.4.3
 >
->• Maven
+>• Gradle
 >
->• PostgreSQL 42.7.2
+>• PostgreSQL
 >
->• jakarta 6.0.0
+>• jpa
 >
->• lombok 1.18.36
+>• lombok
 
 >Тестирование:
->
->
->• JUnit 5.12.0
->
->• TestContext Framework
->
->• mockito
->
->• hamcrest
->
->• H2 2.3.232
 
-> Сервлет-контейнеры: Apache Tomcat, Jetty
+>• JUnit 5
+>
+>• H2
+
+> Сервлет-контейнер: Apache Tomcat (Spring Boot out of box)
 
 > Фронтенд:
 >
->• thymeleaf 3.1.3.RELEASE
+>• thymeleaf
 >
 >• HTML5
 >
@@ -101,9 +93,7 @@
 
 >• Java Development Kit (JDK) версии 21.
 >
->• Apache Maven.
->
->• Сервлет-контейнер (Tomcat или Jetty).
+>• Сборщик проектов Gradle.
 >
 >• PostgreSQL.
 
@@ -113,7 +103,7 @@
 
 `git clone https://github.com/i-bezruchenko/blog-app.git`
 
-`cd blog`
+`cd blog-app`
 
 
 ▎Настройка базы данных
@@ -122,7 +112,7 @@
 
    • Создайте базу данных blog. файл с sql-скриптом лежит в директории `src/main/resources/sql/blog_app_db.sql`
 
-   • Настройте подключение в файле application.properties или аналогичном конфигурационном файле:
+   • Настройте подключение в файле application.yaml:
 
    `spring.datasource.url=jdbc:postgresql://localhost:5432/blog`
 
@@ -140,42 +130,28 @@
 
 ▎Сборка проекта
 
-▎Использование Maven
+▎Использование Gradle
 
 Для сборки проекта выполните команду:
 
-`mvn clean package`
+`./gradlew clean build`
 
-После успешной сборки в папке `target/` появится файл `blog.war`.
+После успешной сборки в папке `build/libs/` появится файл `blog-app-2.0.jar.`
 
 ---
 
 ▎Развертывание приложения
 
-▎На сервере Apache Tomcat
+▎Встроенный сервер Spring Boot
 
-1. Скопируйте `.war`-файл в директорию `<TOMCAT_HOME>/webapps`.
+Поскольку Spring Boot 3 включает встроенный сервер (например, Tomcat или Jetty),
+вам не нужно отдельно устанавливать или настраивать сервер приложений. Для запуска приложения выполните команду:
 
-2. Запустите Tomcat:
+`java -jar build/libs/blog-app-2.0.jar`
 
-   `<TOMCAT_HOME>/bin/startup.sh`
+Приложение будет доступно по адресу:
 
-
-3. Приложение будет доступно по адресу:
-
-   http://localhost:8080/blog-app/
-
-▎На сервере Jetty
-
-1. Убедитесь, что Jetty установлен.
-
-2. Запустите Jetty с вашим .war-файлом:
-
-   java -jar jetty-runner.jar target/blog.war
-
-3. Приложение будет доступно по адресу:
-
-   http://localhost:8080/blog-app/
+http://localhost:8080/
 
 
 ---

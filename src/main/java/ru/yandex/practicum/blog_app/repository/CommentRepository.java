@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.blog_app.consts.SQL;
 import ru.yandex.practicum.blog_app.model.Comment;
 import ru.yandex.practicum.blog_app.util.CommentRowMapper;
 
@@ -19,32 +18,33 @@ public class CommentRepository {
     public List<Comment> findAllCommentsByPostId(Long postId) {
         MapSqlParameterSource params = new MapSqlParameterSource()
             .addValue("postId", postId);
-        return jdbcTemplate.query(SQL.GET_COMMENTS_BY_POST_ID, params, new CommentRowMapper());
+        return jdbcTemplate.query("select id, post_id, content from t_comment where post_id = :postId",
+                params, new CommentRowMapper());
     }
 
     public void deleteCommentsByPostId(Long postId) {
         MapSqlParameterSource params = new MapSqlParameterSource()
             .addValue("postId", postId);
-        jdbcTemplate.update(SQL.DELETE_COMMENTS_BY_POST_ID, params);
+        jdbcTemplate.update("delete from t_comment where post_id = :postId", params);
     }
 
     public void addComment(Long postId, String content) {
         MapSqlParameterSource params = new MapSqlParameterSource()
             .addValue("contentValue", content)
             .addValue("postId", postId);
-        jdbcTemplate.update(SQL.ADD_COMMENT, params);
+        jdbcTemplate.update("insert into t_comment (post_id, content) values (:postId, :contentValue)", params);
     }
 
     public void deleteCommentById(Long commentId) {
         MapSqlParameterSource params = new MapSqlParameterSource()
             .addValue("commentId", commentId);
-        jdbcTemplate.update(SQL.DELETE_COMMENT_BY_ID, params);
+        jdbcTemplate.update("delete from t_comment where id = :commentId", params);
     }
 
     public void updateComment(Long commentId, String content) {
         MapSqlParameterSource params = new MapSqlParameterSource()
             .addValue("commentId", commentId)
             .addValue("contentValue", content);
-        jdbcTemplate.update(SQL.UPDATE_COMMENT, params);
+        jdbcTemplate.update("update t_comment set content = :contentValue where id = :commentId", params);
     }
 }

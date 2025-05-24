@@ -1,7 +1,7 @@
-drop table if exists comment;
-drop table if exists t_post_tag;
-drop table if exists t_post;
-drop table if exists t_tag;
+DROP TABLE IF EXISTS t_comment CASCADE;
+DROP TABLE IF EXISTS t_post_tag CASCADE;
+DROP TABLE IF EXISTS t_tag CASCADE;
+DROP TABLE IF EXISTS t_post CASCADE;
 
 CREATE TABLE t_post (
                         id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

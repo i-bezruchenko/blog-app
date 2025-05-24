@@ -3,9 +3,10 @@ package ru.yandex.practicum.blog_app.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.practicum.blog_app.config.DataSourceConfig;
 import ru.yandex.practicum.blog_app.model.Comment;
 import ru.yandex.practicum.blog_app.util.CommentRowMapper;
@@ -14,8 +15,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringJUnitConfig(classes = {DataSourceConfig.class, CommentRepository.class})
-@TestPropertySource(locations = "classpath:application-test.properties")
+@SpringBootTest
+@ActiveProfiles("test")
+@Import(DataSourceConfig.class)
 class CommentRepositoryTest {
 
     @Autowired
@@ -65,8 +67,7 @@ class CommentRepositoryTest {
 
         assertNotNull(founded);
         assertEquals(expected.size(), founded.size());
-        assertEquals("Comment 1", founded.get(0).getContent());
-        assertEquals("Comment 2", founded.get(1).getContent());
+        assertArrayEquals(expected.toArray(), founded.toArray());
     }
 
     @Test

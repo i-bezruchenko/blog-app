@@ -126,7 +126,7 @@ class PostServiceTest {
     private List<Post> getExpectedPosts(){
         Post post1 = new Post();
         post1.setId(1L);
-        post1.setTitle("Post1");
+        post1.setTitle("Post 1");
         post1.setImage("Post Image Content One".getBytes());
         post1.setContent("Post Text1");
         post1.setLikesCount(10);
@@ -136,7 +136,7 @@ class PostServiceTest {
         post1.setTagsAsText("Tag1 Tag2");
         Post post2 = new Post();
         post2.setId(2L);
-        post2.setTitle("Post2");
+        post2.setTitle("Post 2");
         post2.setImage("Post Image Content Two".getBytes());
         post2.setContent("Post Text2");
         post2.setLikesCount(5);

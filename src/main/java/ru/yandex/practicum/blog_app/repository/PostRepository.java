@@ -7,7 +7,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.blog_app.util.PostRowMapper;
-import ru.yandex.practicum.blog_app.consts.SQL;
 import ru.yandex.practicum.blog_app.model.Post;
 
 import java.util.Collections;
@@ -26,7 +25,23 @@ public class PostRepository {
         MapSqlParameterSource params = new MapSqlParameterSource()
             .addValue("offsetValue", offset)
             .addValue("limitValue", pageSize);
-        return jdbcTemplate.query(SQL.GET_ALL_POSTS, params, new PostRowMapper());
+        return jdbcTemplate.query("""
+            SELECT 
+                p.id,
+                p.title,
+                p.image,
+                p.content,
+                p.likes_count AS likesCount,
+                (
+                    SELECT array_agg(t.name)
+                    FROM t_tag t
+                    JOIN t_post_tag pt ON t.id = pt.tag_id
+                    WHERE pt.post_id = p.id
+                ) AS tags
+            FROM 
+                t_post p
+            limit :limitValue offset :offsetValue
+            """, params, new PostRowMapper());
     }
 
     public Long savePost(String title, byte[] image, List<String> tags, String content) {
@@ -163,19 +178,61 @@ public class PostRepository {
             .addValue("offsetValue", offset)
             .addValue("limitValue", pageSize);
 
-        return jdbcTemplate.query(SQL.GET_POSTS_BY_TAGS, params, new PostRowMapper());
+        return jdbcTemplate.query("""
+        SELECT 
+            p.id,
+            p.title,
+            p.image,
+            p.content,
+            p.likes_count AS likesCount,
+            (
+                SELECT array_agg(t.name)
+                FROM t_tag t
+                JOIN t_post_tag pt ON t.id = pt.tag_id
+                WHERE pt.post_id = p.id
+            ) AS tags
+        FROM 
+            t_post p
+        WHERE 
+            p.id IN (
+                SELECT pt.post_id
+                FROM t_post_tag pt
+                JOIN t_tag t ON pt.tag_id = t.id
+                WHERE t.name IN (:tags)
+                GROUP BY pt.post_id
+                HAVING COUNT(DISTINCT t.name) = :tagCount
+            )
+        limit :limitValue offset :offsetValue
+        """, params, new PostRowMapper());
     }
 
     public Post findPostById(Long postId) {
         MapSqlParameterSource params = new MapSqlParameterSource()
             .addValue("postId", postId);
-        return jdbcTemplate.queryForObject(SQL.GET_POST_BY_ID, params, new PostRowMapper());
+        return jdbcTemplate.query("""
+            SELECT 
+                p.id,
+                p.title,
+                p.image,
+                p.content,
+                p.likes_count AS likesCount,
+                (
+                    SELECT array_agg(t.name)
+                    FROM t_tag t
+                    JOIN t_post_tag pt ON t.id = pt.tag_id
+                    WHERE pt.post_id = p.id
+                ) AS tags
+            FROM 
+                t_post p
+            WHERE 
+                p.id = :postId
+            """, params, new PostRowMapper()).stream().findFirst().orElseThrow();
     }
 
     public void delete(Long postId) {
         MapSqlParameterSource params = new MapSqlParameterSource()
             .addValue("postId", postId);
-        jdbcTemplate.update(SQL.DELETE_POST_TAG_ROWS, params);
-        jdbcTemplate.update(SQL.DELETE_POST_BY_ID, params);
+        jdbcTemplate.update("delete from t_post_tag where post_id = :postId", params);
+        jdbcTemplate.update("delete from t_post where id = :postId", params);
     }
 }
